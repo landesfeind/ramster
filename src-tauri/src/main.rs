@@ -4,6 +4,8 @@
 
 mod error;
 pub use error::*;
+pub mod models;
+use models::*;
 mod db;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
@@ -12,9 +14,16 @@ fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
 
-fn main() {
+
+#[tokio::main]
+async fn main() {
+		let db = db::connect().await.expect("Cannot connect to database");
+
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![greet])
+				.manage(db)
+        .invoke_handler(tauri::generate_handler![
+				    greet
+				  ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
